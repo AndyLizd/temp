@@ -10,10 +10,10 @@ from pdb import set_trace as bk
 
 # parameters
 ENV_NAME = ['CartPole-v1','LunarLander-v2'][0]
-seed = 1
+seed = 10
 vnet_hid_size = 30
 act_hid_size = 80
-n_episode = 8000
+n_episode = 100000
 gamma = 0.99
 CRITIC_LR = 1e-3
 ACTOR_LR = 1e-2
@@ -32,7 +32,7 @@ optimizer_critic = torch.optim.Adam(critic.parameters(), lr = CRITIC_LR)
 optimizer_actor = torch.optim.Adam(actor.parameters(), lr = ACTOR_LR)
 LossMSE = torch.nn.MSELoss(reduction='sum')
 
-traj = Traj(gamma)
+
 
 # for testing
 average_total_r = 0
@@ -40,7 +40,7 @@ average_total_r = 0
 
 for i_eps in range(n_episode):
     # init trajectory
-    traj.reset()
+    traj = Traj(gamma)
     # init env
     s1 = env.reset()
     total_r = 0
@@ -71,5 +71,8 @@ for i_eps in range(n_episode):
     actor_loss = -torch.mean(torch.mul(Log_a, Adv))
     update_net(actor, actor_loss, optimizer_actor)
 
-    # del traj
+    bk()
+
+    del traj
     
+   

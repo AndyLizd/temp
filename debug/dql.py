@@ -2,10 +2,29 @@
 
 import numpy as np 
 import torch
-from model import Q_Net
+# from model import QNet
 import gym
 from pdb import set_trace as bk
 from lib import e_greedy, Buffer
+import torch.nn as nn
+
+
+class QNet(nn.Module):
+    def __init__(self, obs_size, act_size, hid_size=20):
+        super(QNet, self).__init__()
+        self.Q_val = nn.Sequential(
+            nn.Linear(obs_size, hid_size),
+            nn.Tanh(),
+            nn.Dropout(p=0.5),
+            nn.Linear(hid_size, hid_size),
+            nn.Tanh(),
+            nn.Dropout(p=0.5),
+            nn.Linear(hid_size, act_size),
+            # nn.Tanh(),
+        )
+    
+    def forward(self, x):
+        return self.Q_val(x)
 
 # parameters
 LEARNING_RATE = 1e-4
@@ -33,8 +52,8 @@ num_obs = env.observation_space.shape[0]
 num_act = env.action_space.n 
 # neural netword
 # initialize action-value function Q
-qnet = Q_Net(num_obs, num_act, hid_size=hid_size)
-qnet_target = Q_Net(num_obs, num_act, hid_size=hid_size)
+qnet = QNet(num_obs, num_act, hid_size=hid_size)
+qnet_target = QNet(num_obs, num_act, hid_size=hid_size)
 qnet_target.load_state_dict(qnet.state_dict())
 
 LossMSE = torch.nn.MSELoss(reduction='sum')
@@ -100,7 +119,8 @@ for i_eps in range(n_episode):
 
                 if average_r >= best_test_r:
                     best_test_r = average_r
-                    torch.save(qnet, PATH_TO_SAVE)
+                    # torch.save(qnet, PATH_TO_SAVE)
+                    torch.save({'state_dict': qnet.state_dict()}, PATH_TO_SAVE)
                     print('Find and save a better model!')
 
             # update the target network
