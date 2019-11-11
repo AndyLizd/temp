@@ -1,2 +1,2 @@
 # temp
-temporary repo to hold code -- testing or ...
+temporary repo for debug and test
